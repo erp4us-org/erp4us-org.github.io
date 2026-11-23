@@ -4,3 +4,4 @@ dist
 package-lock.json
 LICENSE
 public/brand/*.svg
+public/brand/tokens.css
