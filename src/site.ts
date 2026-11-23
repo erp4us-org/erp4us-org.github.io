@@ -16,14 +16,18 @@ export type Page = (typeof pages)[number];
 export const path = (l: Locale, p: Page) =>
   `/${l === "en" ? "" : l + "/"}${p === "home" ? "" : p + "/"}`;
 export const repo = "https://github.com/erp4us-org/erp4us";
+const forum = repo + "/discussions";
+const guide = repo + "/blob/main/CONTRIBUTING.md";
 export const actions = {
+  forum,
+  industryKnowledge: guide + "#share-industry-knowledge",
+  businessRequirement: forum + "/new/choose",
+  guide,
   first: repo + "/issues?q=is%3Aopen+label%3A%22good+first+issue%22",
   scenario: repo + "/issues/16",
-  forum: repo + "/discussions",
   issues: repo + "/issues",
   prs: repo + "/pulls",
   rfc: repo + "/blob/main/GOVERNANCE.md",
-  guide: repo + "/blob/main/CONTRIBUTING.md",
 };
 async function snapshot() {
   try {
