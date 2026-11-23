@@ -1,0 +1,205 @@
+---
+import {
+  catalogs,
+  languages,
+  pages,
+  path,
+  repo,
+  actions,
+  signals,
+  type Locale,
+  type Page,
+} from "../site";
+import "../style.css";
+export function getStaticPaths() {
+  return (Object.keys(catalogs) as Locale[]).flatMap((locale) =>
+    pages.map((page) => ({
+      params: {
+        route:
+          path(locale, page).split("/").filter(Boolean).join("/") || undefined,
+      },
+      props: { locale, page },
+    })),
+  );
+}
+const { locale, page } = Astro.props as { locale: Locale; page: Page };
+const t = (k: string) =>
+  (catalogs[locale] as Record<string, string>)[k] ??
+  (catalogs.en as Record<string, string>)[k];
+const group = (g: string) =>
+  Object.keys(catalogs.en).filter((k) => k.startsWith(g + "."));
+const snap = await signals;
+const home = page === "home",
+  title = t(home ? "hero" : "nav." + page),
+  intro = t(
+    home ? "subtitle" : page === "roadmap" ? "roadintro" : page + ".intro",
+  );
+const url = new URL(path(locale, page), Astro.site);
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} | erp4us</title>
+    <meta name="description" content={intro} />
+    <link rel="canonical" href={url} />
+    {Object.keys(languages).map((l) => (
+      <link
+        rel="alternate"
+        hreflang={l}
+        href={new URL(path(l as Locale, page), Astro.site)}
+      />
+    ))}
+    <link rel="icon" href="/brand/favicon.svg" />
+    <meta property="og:title" content={`${title} | erp4us`} />
+    <meta property="og:description" content={intro} />
+    <meta
+      property="og:image"
+      content={new URL("/brand/social.png", Astro.site)}
+    />
+  </head>
+  <body>
+    <a class="skip" href="#content">
+      {t("skip")}
+    </a>
+    <header>
+      <a class="word" href={path(locale, "home")} aria-label="erp4us">
+        <img src="/brand/symbol.svg" alt="" width="36" height="36" />
+        erp<b>4</b>us
+      </a>
+      <nav>
+        {pages.slice(1).map((p) => (
+          <a
+            href={path(locale, p)}
+            aria-current={p === page ? "page" : undefined}
+          >
+            {t("nav." + p)}
+          </a>
+        ))}
+      </nav>
+      <aside aria-label={t("language")}>
+        {Object.entries(languages).map(([l, name]) => (
+          <a
+            lang={l}
+            href={path(l as Locale, page)}
+            aria-current={l === locale ? "true" : undefined}
+          >
+            {name}
+          </a>
+        ))}
+      </aside>
+    </header>
+    <main id="content">
+      <section class:list={["hero", { home }]}>
+        <div class="eyebrow">
+          <i></i>
+          {t("early")}
+        </div>
+        <h1>{title}</h1>
+        <p class="lead">{intro}</p>
+        {home && (
+          <>
+            <div class="buttons">
+              <a href={path(locale, "vision")}>{t("explore")} →</a>
+              <a href={actions.first}>{t("join")} ↗</a>
+            </div>
+            <img class="hero-mark" src="/brand/symbol.svg" alt="" />
+          </>
+        )}
+      </section>
+      {(home || page === "roadmap") && (
+        <>
+          <p class="note">{t("status")}</p>
+          <h2>{t("domains")}</h2>
+          <dl>
+            {[
+              ["available", "now"],
+              ["active", "working"],
+              ["experimental", "draft"],
+              ...group("domain").map((k) => ["planned", k]),
+            ].map(([s, k]) => (
+              <div>
+                <dt>{t(k)}</dt>
+                <dd>{t(s)}</dd>
+              </div>
+            ))}
+          </dl>
+        </>
+      )}
+      {page === "vision" && (
+        <>
+          <h2>{t("principles")}</h2>
+          <ul class="cards">
+            {group("principle").map((k) => (
+              <li>{t(k)}</li>
+            ))}
+          </ul>
+        </>
+      )}
+      {page === "architecture" && (
+        <>
+          <figure>
+            <figcaption>{t("path")}</figcaption>
+            <ol class="diagram">
+              {["layer1", "layer2", "layer3", "layer4"].map((k) => (
+                <li>{t(k)}</li>
+              ))}
+            </ol>
+          </figure>
+          <ul class="cards">
+            {group("stack").map((k) => (
+              <li>{t(k)}</li>
+            ))}
+          </ul>
+        </>
+      )}
+      {page === "industries" && (
+        <ul class="cards">
+          {group("industry").map((k) => (
+            <li>{t(k)}</li>
+          ))}
+        </ul>
+      )}
+      {page === "roadmap" && (
+        <>
+          <ol class="steps">
+            {group("phase").map((k) => (
+              <li>{t(k)}</li>
+            ))}
+          </ol>
+          <a href={repo + "/blob/main/ROADMAP.md"}>{t("source")} ↗</a>
+        </>
+      )}
+      {(page === "community" || page === "contribute") && (
+        <div class="cards">
+          {Object.entries(actions).map(([k, href]) => (
+            <a href={href}>{t(k)} ↗</a>
+          ))}
+        </div>
+      )}
+      {home && snap && (
+        <section>
+          <h2>{t("signal")}</h2>
+          <p>
+            <a href={repo + "/stargazers"}>
+              {snap.stars} {t("stars")}
+            </a>{" "}
+            · {t("snapshot")}: <time>{snap.date}</time>
+          </p>
+        </section>
+      )}
+    </main>
+    <footer>
+      <strong>{t("slogan")}</strong>
+      <nav>
+        <a href={repo + "/tree/main/docs"}>{t("docs")}</a>
+        <span>
+          {t("demo")} · {t("planned")}
+        </span>
+        <a href={repo}>{t("github")} ↗</a>
+      </nav>
+    </footer>
+  </body>
+</html>

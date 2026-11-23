@@ -1,0 +1,33 @@
+{
+  "name": "erp4us-website",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "check": "astro check",
+    "format": "prettier --check .",
+    "lint": "node scripts/catalog.mjs",
+    "links": "python3 scripts/links.py"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/erp4us-org/erp4us-org.github.io.git"
+  },
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/erp4us-org/erp4us-org.github.io/issues"
+  },
+  "homepage": "https://github.com/erp4us-org/erp4us-org.github.io#readme",
+  "dependencies": {
+    "astro": "7.4.13"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.12",
+    "prettier": "3.10.1",
+    "prettier-plugin-astro": "1.1.2",
+    "typescript": "5.9.3"
+  },
+  "type": "module",
+  "private": true
+}

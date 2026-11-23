@@ -1,0 +1,1 @@
+Use lowercase erp4us. Publish only capability claims supported by the application default branch. Edit stable translation keys rather than embedding copy in components. Keep PR checks credential-free and deployment main-only. Run the README validation sequence; record results and outstanding work in the PR. No production DNS changes or new external services without approval.
