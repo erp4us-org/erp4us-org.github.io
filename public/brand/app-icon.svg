@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">
+  <title>erp4us</title>
+  <rect width="96" height="96" rx="22" fill="#182230"/>
+  <path d="M56 22 28 56h41M56 38v36" fill="none" stroke="#e7ebf0" stroke-width="9" stroke-linejoin="round"/>
+  <path d="M48 18a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4h-8a4 4 0 0 1-4-4zM20 52a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4h-8a4 4 0 0 1-4-4zM48 70a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4h-8a4 4 0 0 1-4-4z" fill="#62b5ba"/>
+</svg>

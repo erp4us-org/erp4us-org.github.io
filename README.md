@@ -11,3 +11,7 @@ The [application roadmap](https://github.com/erp4us-org/erp4us/blob/main/ROADMAP
 ## Publishing
 
 Pull requests validate on hosted runners; only a validated main build uploads and deploys to GitHub Pages. Preview: https://erp4us-org.github.io/. [Custom domain runbook](docs/domain.md). [Brand assets](public/brand/README.md).
+
+## Dependencies
+
+Follow the [monthly review and critical-fix process](https://github.com/erp4us-org/.github/blob/main/docs/dependency-maintenance.md). Group Astro, checker and compatible TypeScript versions in a reviewed maintenance PR; keep `package-lock.json` and `.nvmrc`. Run `npm ci`, `npm audit --audit-level=high` (including build dependencies), and the full validation sequence above. Review new packages, licenses, Node engine and deployment compatibility before a manual merge.

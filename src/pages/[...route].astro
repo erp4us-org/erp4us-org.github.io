@@ -53,6 +53,16 @@ const url = new URL(path(locale, page), Astro.site);
       />
     ))}
     <link rel="icon" href="/brand/favicon.svg" />
+    <link rel="stylesheet" href="/brand/tokens.css" />
+    <script is:inline>
+      try {
+        const theme = localStorage.getItem("erp4us.site.theme");
+        if (theme === "light" || theme === "dark")
+          document.documentElement.dataset.theme = theme;
+      } catch {
+        /* Follow system preference when storage is unavailable. */
+      }
+    </script>
     <meta property="og:title" content={`${title} | erp4us`} />
     <meta property="og:description" content={intro} />
     <meta
@@ -69,7 +79,7 @@ const url = new URL(path(locale, page), Astro.site);
         <img src="/brand/symbol.svg" alt="" width="36" height="36" />
         erp<b>4</b>us
       </a>
-      <nav>
+      <nav aria-label={t("nav.site")}>
         {pages.slice(1).map((p) => (
           <a
             href={path(locale, p)}
@@ -79,7 +89,7 @@ const url = new URL(path(locale, page), Astro.site);
           </a>
         ))}
       </nav>
-      <aside aria-label={t("language")}>
+      <nav class="utility" aria-label={t("language")}>
         {Object.entries(languages).map(([l, name]) => (
           <a
             lang={l}
@@ -89,30 +99,70 @@ const url = new URL(path(locale, page), Astro.site);
             {name}
           </a>
         ))}
-      </aside>
+        <label class="sr-only" for="site-theme">
+          {t("theme.label")}
+        </label>
+        <select id="site-theme" hidden>
+          <option value="system">{t("theme.system")}</option>
+          <option value="light">{t("theme.light")}</option>
+          <option value="dark">{t("theme.dark")}</option>
+        </select>
+      </nav>
     </header>
     <main id="content">
       <section class:list={["hero", { home }]}>
-        <div class="eyebrow">
-          <i></i>
-          {t("early")}
-        </div>
-        <h1>{title}</h1>
-        <p class="lead">{intro}</p>
-        {home && (
-          <>
+        <div>
+          {home && <p class="eyebrow">{t("early")}</p>}
+          <h1>{title}</h1>
+          <p class="lead">{intro}</p>
+          {home && (
             <div class="buttons">
-              <a href={path(locale, "vision")}>{t("explore")} →</a>
-              <a href={actions.forum}>{t("forum")} ↗</a>
+              <a href={path(locale, "vision")}>
+                {t("explore")} <span aria-hidden="true">→</span>
+              </a>
+              <a href={actions.forum}>
+                {t("forum")} <span aria-hidden="true">↗</span>
+              </a>
             </div>
-            <img class="hero-mark" src="/brand/symbol.svg" alt="" />
-          </>
+          )}
+        </div>
+        {home && (
+          <figure class="preview">
+            <figcaption>{t("preview.caption")}</figcaption>
+            <div class="preview-window">
+              <div class="preview-header">
+                <img src="/brand/symbol.svg" width="23" height="23" alt="" />
+                <strong>erp4us</strong>
+              </div>
+              <div class="preview-body">
+                <div class="preview-rail">
+                  <span>{t("preview.workspace")}</span>
+                  <strong>{t("preview.master")}</strong>
+                </div>
+                <div class="preview-content">
+                  <span>
+                    {t("preview.master")} / {t("preview.products")}
+                  </span>
+                  <strong class="preview-title">{t("preview.products")}</strong>
+                  <div class="preview-card">
+                    <b>{t("preview.register")}</b>
+                    <span>
+                      <code>SKU</code> · {t("preview.name")}
+                    </span>
+                  </div>
+                  <div class="preview-card">
+                    <b>{t("preview.lookup")}</b>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </figure>
         )}
       </section>
       {(home || page === "roadmap") && (
-        <>
-          <p class="note">{t("status")}</p>
+        <section class="capabilities">
           <h2>{t("domains")}</h2>
+          <p>{t("status")}</p>
           <dl>
             {[
               ["available", "now"],
@@ -122,11 +172,11 @@ const url = new URL(path(locale, page), Astro.site);
             ].map(([s, k]) => (
               <div>
                 <dt>{t(k)}</dt>
-                <dd>{t(s)}</dd>
+                <dd class:list={["capability", s]}>{t(s)}</dd>
               </div>
             ))}
           </dl>
-        </>
+        </section>
       )}
       {page === "vision" && (
         <>
@@ -140,7 +190,7 @@ const url = new URL(path(locale, page), Astro.site);
       )}
       {page === "architecture" && (
         <>
-          <figure>
+          <figure class="architecture">
             <figcaption>{t("path")}</figcaption>
             <ol class="diagram">
               {["layer1", "layer2", "layer3", "layer4"].map((k) => (
@@ -148,11 +198,51 @@ const url = new URL(path(locale, page), Astro.site);
               ))}
             </ol>
           </figure>
-          <ul class="cards">
-            {group("stack").map((k) => (
-              <li>{t(k)}</li>
-            ))}
-          </ul>
+          <section aria-labelledby="technology-stack">
+            <h2 id="technology-stack">{t("stack.heading")}</h2>
+            <h3>{t("stack.local")}</h3>
+            <p>{t("stack.localNote")}</p>
+            <ul class="cards">
+              {[
+                "angular",
+                "rust",
+                "mongodb",
+                "contracts",
+                "compose",
+                "nats",
+              ].map((key) => (
+                <li>
+                  <strong>{t(`stack.${key}.name`)}</strong>
+                  <p>{t(`stack.${key}.detail`)}</p>
+                </li>
+              ))}
+            </ul>
+            <h3>{t("stack.planned")}</h3>
+            <ul class="cards">
+              {["identity", "storage", "kubernetes", "mcp"].map((key) => (
+                <li>
+                  <strong>{t(`stack.${key}.name`)}</strong>
+                  <p>{t(`stack.${key}.detail`)}</p>
+                </li>
+              ))}
+            </ul>
+            <h3>{t("stack.sources")}</h3>
+            <ul>
+              <li>
+                <a href={repo + "#run-the-first-slice"}>
+                  {t("stack.quickstart")}
+                </a>
+              </li>
+              <li>
+                <a href={repo + "/tree/main/docs/adr"}>
+                  {t("stack.decisions")}
+                </a>
+              </li>
+              <li>
+                <a href={repo + "/blob/main/ROADMAP.md"}>{t("nav.roadmap")}</a>
+              </li>
+            </ul>
+          </section>
         </>
       )}
       {page === "industries" && (
@@ -195,11 +285,25 @@ const url = new URL(path(locale, page), Astro.site);
       <strong>{t("slogan")}</strong>
       <nav>
         <a href={repo + "/tree/main/docs"}>{t("docs")}</a>
-        <span>
-          {t("demo")} · {t("planned")}
-        </span>
         <a href={repo}>{t("github")} ↗</a>
       </nav>
     </footer>
+    <script>
+      const select = document.querySelector<HTMLSelectElement>("#site-theme");
+      if (select) {
+        const root = document.documentElement;
+        select.value = root.dataset.theme ?? "system";
+        select.hidden = false;
+        select.addEventListener("change", () => {
+          if (select.value === "system") delete root.dataset.theme;
+          else root.dataset.theme = select.value;
+          try {
+            localStorage.setItem("erp4us.site.theme", select.value);
+          } catch {
+            /* The explicit theme still applies for this page. */
+          }
+        });
+      }
+    </script>
   </body>
 </html>

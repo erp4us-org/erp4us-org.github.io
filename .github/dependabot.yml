@@ -1,8 +1,19 @@
+# A schedule is required by Dependabot; zero disables regular version PRs only.
 version: 2
 updates:
   - package-ecosystem: npm
     directory: "/"
-    schedule: { interval: weekly }
+    schedule: { interval: monthly }
+    open-pull-requests-limit: 0
+    groups:
+      security-patches:
+        applies-to: security-updates
+        patterns: ["*"]
   - package-ecosystem: github-actions
     directory: "/"
-    schedule: { interval: weekly }
+    schedule: { interval: monthly }
+    open-pull-requests-limit: 0
+    groups:
+      security-patches:
+        applies-to: security-updates
+        patterns: ["*"]

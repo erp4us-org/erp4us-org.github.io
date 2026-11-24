@@ -20,7 +20,7 @@ const forum = repo + "/discussions";
 const guide = repo + "/blob/main/CONTRIBUTING.md";
 export const actions = {
   forum,
-  industryKnowledge: guide + "#share-industry-knowledge",
+  industryKnowledge: forum + "/72",
   businessRequirement: forum + "/new/choose",
   guide,
   first: repo + "/issues?q=is%3Aopen+label%3A%22good+first+issue%22",
