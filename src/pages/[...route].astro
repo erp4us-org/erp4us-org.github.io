@@ -198,11 +198,51 @@ const url = new URL(path(locale, page), Astro.site);
               ))}
             </ol>
           </figure>
-          <ul class="cards">
-            {group("stack").map((k) => (
-              <li>{t(k)}</li>
-            ))}
-          </ul>
+          <section aria-labelledby="technology-stack">
+            <h2 id="technology-stack">{t("stack.heading")}</h2>
+            <h3>{t("stack.local")}</h3>
+            <p>{t("stack.localNote")}</p>
+            <ul class="cards">
+              {[
+                "angular",
+                "rust",
+                "mongodb",
+                "contracts",
+                "compose",
+                "nats",
+              ].map((key) => (
+                <li>
+                  <strong>{t(`stack.${key}.name`)}</strong>
+                  <p>{t(`stack.${key}.detail`)}</p>
+                </li>
+              ))}
+            </ul>
+            <h3>{t("stack.planned")}</h3>
+            <ul class="cards">
+              {["identity", "storage", "kubernetes", "mcp"].map((key) => (
+                <li>
+                  <strong>{t(`stack.${key}.name`)}</strong>
+                  <p>{t(`stack.${key}.detail`)}</p>
+                </li>
+              ))}
+            </ul>
+            <h3>{t("stack.sources")}</h3>
+            <ul>
+              <li>
+                <a href={repo + "#run-the-first-slice"}>
+                  {t("stack.quickstart")}
+                </a>
+              </li>
+              <li>
+                <a href={repo + "/tree/main/docs/adr"}>
+                  {t("stack.decisions")}
+                </a>
+              </li>
+              <li>
+                <a href={repo + "/blob/main/ROADMAP.md"}>{t("nav.roadmap")}</a>
+              </li>
+            </ul>
+          </section>
         </>
       )}
       {page === "industries" && (
