@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <title>erp4us — ERP by everyone, for everyone. Open source.</title>
+  <rect width="1200" height="630" fill="#11151b"/>
+  <rect x="45" y="45" width="1110" height="540" rx="30" fill="#182230" stroke="#303945" stroke-width="2"/>
+  <g transform="translate(94 90) scale(1.18)">
+    <rect width="96" height="96" rx="22" fill="#11151b"/>
+    <path d="M56 22 28 56h41M56 38v36" fill="none" stroke="#e7ebf0" stroke-width="9" stroke-linejoin="round"/>
+    <g fill="#62b5ba"><rect x="48" y="14" width="16" height="16" rx="4"/><rect x="20" y="48" width="16" height="16" rx="4"/><rect x="48" y="66" width="16" height="16" rx="4"/></g>
+  </g>
+  <g font-family="DejaVu Sans, sans-serif">
+    <text x="235" y="169" font-size="76" font-weight="700" fill="#e7ebf0">erp<tspan fill="#62b5ba">4</tspan>us</text>
+    <path d="M96 246H1104" stroke="#445164" stroke-width="2"/>
+    <text x="96" y="345" font-size="68" font-weight="700" fill="#e7ebf0">ERP by everyone,</text>
+    <text x="96" y="429" font-size="68" font-weight="700" fill="#e7ebf0">for everyone.</text>
+    <text x="99" y="527" font-size="28" font-weight="700" letter-spacing="3" fill="#86c5c9">OPEN-SOURCE PROJECT</text>
+  </g>
+</svg>

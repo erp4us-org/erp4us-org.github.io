@@ -1,0 +1,36 @@
+---
+import recognition from "../content/recognition.json";
+import { translate, type Locale } from "../site";
+const { locale } = Astro.props as { locale: Locale };
+const t = (key: string) => translate(locale, key);
+type Recognition = {
+  login: string;
+  role: "contributor" | "maintainer" | "founding" | "documentation" | "domain";
+  evidence: string;
+};
+// Include only reviewed, opted-in entries with a public contribution reference.
+const entries: Recognition[] = recognition;
+for (const person of entries) {
+  if (
+    !/^[a-z\d](?:[a-z\d-]{0,37}[a-z\d])?$/i.test(person.login) ||
+    !/^https:\/\/github\.com\/erp4us-org\/[\w.-]+\/(?:pull\/\d+|issues\/\d+|commit\/[a-f0-9]+)$/.test(
+      person.evidence,
+    )
+  )
+    throw new Error("Invalid contributor recognition entry");
+}
+---
+
+{entries.length >= 2 && (
+  <section class="panel" aria-labelledby="wall-heading">
+    <h2 id="wall-heading">{t("wall.title")}</h2>
+    <ul class="entry-list">
+      {entries.map(({ login, role, evidence }) => (
+        <li>
+          <a href={`https://github.com/${login}`}>{login}</a> ·{" "}
+          <a href={evidence}>{t(`wall.${role}`)}</a>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}

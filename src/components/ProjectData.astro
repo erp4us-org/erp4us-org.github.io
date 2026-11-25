@@ -1,0 +1,209 @@
+---
+import { decisions, projectData } from "../project-data";
+import { actions, areaLinks, repo, translate, type Locale } from "../site";
+const { locale, section } = Astro.props as {
+  locale: Locale;
+  section: "opportunities" | "questions" | "activity" | "milestones";
+};
+const t = (key: string) => translate(locale, key);
+const data = await projectData;
+const date = (value: string) =>
+  new Intl.DateTimeFormat(locale, {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "UTC",
+  }).format(new Date(value));
+---
+
+<section class="panel" id={section} aria-labelledby={`${section}-title`}>
+  <p class="eyebrow">{t(`data.${section}.eyebrow`)}</p>
+  <h2 id={`${section}-title`}>{t(`data.${section}.title`)}</h2>
+  <p>{t(`data.${section}.intro`)}</p>
+  {!data ? (
+    <p class="section-note">{t("data.unavailable")}</p>
+  ) : (
+    <p class="section-note">
+      {t("data.updated")}{" "}
+      <time datetime={data.updated}>{date(data.updated)} UTC</time>
+    </p>
+  )}
+  {section === "opportunities" && (
+    <>
+      {data?.opportunities.length ? (
+        <>
+          <div class="filter" hidden>
+            <label for="area-filter">{t("data.filter")}</label>
+            <select id="area-filter">
+              <option value="">{t("data.allAreas")}</option>
+              {Object.keys(areaLinks).map((area) => (
+                <option value={area}>{t(`area.${area}`)}</option>
+              ))}
+              <option value="other">{t("area.other")}</option>
+            </select>
+          </div>
+          <p id="filter-empty" role="status" hidden>
+            {t("data.noFilterMatches")}
+          </p>
+          <ul class="entry-list" id="opportunity-list">
+            {data.opportunities.map((item) => (
+              <li data-areas={item.areas.join(" ") || "other"}>
+                <p class="entry-meta">
+                  {item.repo} · {t(`data.status.${item.status}`)}
+                  {item.level && ` · ${t("data.level.first")}`}
+                </p>
+                <h3>
+                  <a href={item.url}>{item.title} ↗</a>
+                </h3>
+                {item.summary && <p>{item.summary}</p>}
+                <p class="entry-meta">
+                  {(item.areas.length ? item.areas : ["other"])
+                    .map((area) => t(`area.${area}`))
+                    .join(" · ")}
+                </p>
+                <ul class="tags" aria-label={t("data.labels")}>
+                  {item.labels.map((label) => (
+                    <li>{label}</li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : (
+        data && <p class="section-note">{t("data.noOpportunities")}</p>
+      )}
+      <p class="section-note">
+        <a href={actions.issues}>{t("issues")} ↗</a> ·{" "}
+        <a href={actions.forum}>{t("forum")} ↗</a>
+      </p>
+    </>
+  )}
+  {section === "questions" && (
+    <>
+      <ul class="entry-list">
+        {data?.questions.map((item) => (
+          <li>
+            <p class="entry-meta">
+              {item.repo} ·{" "}
+              {item.issue ? t(`data.category.${item.category}`) : item.category}{" "}
+              · {t("data.open")}
+            </p>
+            <h3>
+              <a href={item.url}>{item.title} ↗</a>
+            </h3>
+            {item.summary && <p>{item.summary}</p>}
+          </li>
+        ))}
+      </ul>
+      {data && !data.questions.length && <p>{t("data.noQuestions")}</p>}
+      <p class="section-note">
+        <a href={actions.forum}>{t("forum")} ↗</a>
+      </p>
+    </>
+  )}
+  {section === "activity" && (
+    <>
+      {data && (
+        <>
+          <dl class="metrics">
+            {Object.entries(data.metrics).map(([key, value]) => (
+              <div>
+                <dt>{t(`metric.${key}`)}</dt>
+                <dd>{new Intl.NumberFormat(locale).format(value)}</dd>
+              </div>
+            ))}
+          </dl>
+          <details>
+            <summary>{t("data.definitions")}</summary>
+            <dl class="definitions">
+              {Object.keys(data.metrics).map((key) => (
+                <div>
+                  <dt>{t(`metric.${key}`)}</dt>
+                  <dd>{t(`metric.${key}.definition`)}</dd>
+                </div>
+              ))}
+            </dl>
+          </details>
+          <h3>{t("data.recent")}</h3>
+          {data.activity.length ? (
+            <ul class="entry-list">
+              {data.activity.map((entry) => (
+                <li>
+                  <p class="entry-meta">
+                    {t(`data.event.${entry.kind}`)} · {entry.repo} ·{" "}
+                    <time datetime={entry.date}>{date(entry.date)} UTC</time>
+                  </p>
+                  <a href={entry.url}>{entry.title} ↗</a>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>{t("data.noActivity")}</p>
+          )}
+        </>
+      )}
+      <h3>{t("stack.decisions")}</h3>
+      <ul>
+        {decisions.map(({ index, url }) => (
+          <li>
+            <a href={url}>{t(`data.adr.${index}`)} ↗</a>
+          </li>
+        ))}
+      </ul>
+    </>
+  )}
+  {section === "milestones" && (
+    <>
+      {data &&
+        (["closed", "open"] as const).map((state) => {
+          const entries = data.milestones.filter(
+            (item) => item.state === state,
+          );
+          return (
+            <div class="section-note">
+              <h3>{t(`data.milestones.${state}`)}</h3>
+              {entries.length ? (
+                <ul class="entry-list">
+                  {entries.map((entry) => (
+                    <li>
+                      <p class="entry-meta">{entry.repo}</p>
+                      <a href={entry.url}>{entry.title} ↗</a>
+                      {entry.summary && <p>{entry.summary}</p>}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>{t(`data.milestones.${state}.empty`)}</p>
+              )}
+            </div>
+          );
+        })}
+      <p class="section-note">
+        <a href={`${repo}/milestones`}>{t("data.milestones.link")} ↗</a>
+      </p>
+    </>
+  )}
+</section>
+<script>
+  const filter = document.querySelector<HTMLSelectElement>("#area-filter");
+  const items = document.querySelectorAll<HTMLElement>(
+    "#opportunity-list [data-areas]",
+  );
+  const empty = document.querySelector<HTMLElement>("#filter-empty");
+  if (filter && empty) {
+    filter.closest<HTMLElement>(".filter")?.removeAttribute("hidden");
+    const apply = () => {
+      let matches = 0;
+      for (const item of items) {
+        item.hidden = Boolean(
+          filter.value &&
+          !item.dataset.areas?.split(" ").includes(filter.value),
+        );
+        if (!item.hidden) matches++;
+      }
+      empty.hidden = matches > 0;
+    };
+    filter.addEventListener("change", apply);
+    apply();
+  }
+</script>

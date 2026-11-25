@@ -1,18 +1,27 @@
 ---
+import Layout from "../components/Layout.astro";
+import ProjectData from "../components/ProjectData.astro";
+import ContributorWall from "../components/ContributorWall.astro";
+import Article from "../components/Article.astro";
+import type { CollectionEntry } from "astro:content";
+import { posts, articlePath } from "../devlog";
 import {
+  areaLinks,
   catalogs,
-  languages,
+  organization,
   pages,
   path,
+  policies,
   repo,
-  actions,
-  signals,
+  translate,
   type Locale,
   type Page,
 } from "../site";
-import "../style.css";
-export function getStaticPaths() {
-  return (Object.keys(catalogs) as Locale[]).flatMap((locale) =>
+
+export async function getStaticPaths() {
+  const published = await posts();
+  const locales = Object.keys(catalogs) as Locale[];
+  const routes = locales.flatMap((locale) =>
     pages.map((page) => ({
       params: {
         route:
@@ -21,145 +30,265 @@ export function getStaticPaths() {
       props: { locale, page },
     })),
   );
+  return [
+    ...routes,
+    ...published.map((entry) => ({
+      params: {
+        route: articlePath(entry.data.locale, entry.data.slug)
+          .split("/")
+          .filter(Boolean)
+          .join("/"),
+      },
+      props: {
+        locale: entry.data.locale,
+        page: "devlog",
+        entry,
+        alternatives: Object.fromEntries(
+          published
+            .filter(
+              ({ data }) => data.translationKey === entry.data.translationKey,
+            )
+            .map(({ data }) => [
+              data.locale,
+              articlePath(data.locale, data.slug),
+            ]),
+        ),
+      },
+    })),
+  ];
 }
-const { locale, page } = Astro.props as { locale: Locale; page: Page };
-const t = (k: string) =>
-  (catalogs[locale] as Record<string, string>)[k] ??
-  (catalogs.en as Record<string, string>)[k];
+const {
+  locale,
+  page,
+  entry,
+  alternatives = {},
+} = Astro.props as {
+  locale: Locale;
+  page: Page;
+  entry?: CollectionEntry<"devlog">;
+  alternatives?: Partial<Record<Locale, string>>;
+};
+const t = (key: string) => translate(locale, key);
 const group = (g: string) =>
-  Object.keys(catalogs.en).filter((k) => k.startsWith(g + "."));
-const snap = await signals;
-const home = page === "home",
-  title = t(home ? "hero" : "nav." + page),
-  intro = t(
-    home ? "subtitle" : page === "roadmap" ? "roadintro" : page + ".intro",
-  );
-const url = new URL(path(locale, page), Astro.site);
+  Object.keys(catalogs.en).filter((key) => key.startsWith(`${g}.`));
+const home = page === "home";
+const title = t(
+  home ? "hero" : page === "contribute" ? "founding.title" : `nav.${page}`,
+);
+const intro = t(
+  home ? "subtitle" : page === "roadmap" ? "roadintro" : `${page}.intro`,
+);
+const entries = page === "devlog" ? await posts(locale) : [];
 ---
 
-<!doctype html>
-<html lang={locale}>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title} | erp4us</title>
-    <meta name="description" content={intro} />
-    <link rel="canonical" href={url} />
-    {Object.keys(languages).map((l) => (
-      <link
-        rel="alternate"
-        hreflang={l}
-        href={new URL(path(l as Locale, page), Astro.site)}
-      />
-    ))}
-    <link rel="icon" href="/brand/favicon.svg" />
-    <link rel="stylesheet" href="/brand/tokens.css" />
-    <script is:inline>
-      try {
-        const theme = localStorage.getItem("erp4us.site.theme");
-        if (theme === "light" || theme === "dark")
-          document.documentElement.dataset.theme = theme;
-      } catch {
-        /* Follow system preference when storage is unavailable. */
-      }
-    </script>
-    <meta property="og:title" content={`${title} | erp4us`} />
-    <meta property="og:description" content={intro} />
-    <meta
-      property="og:image"
-      content={new URL("/brand/social.png", Astro.site)}
-    />
-  </head>
-  <body>
-    <a class="skip" href="#content">
-      {t("skip")}
-    </a>
-    <header>
-      <a class="word" href={path(locale, "home")} aria-label="erp4us">
-        <img src="/brand/symbol.svg" alt="" width="36" height="36" />
-        erp<b>4</b>us
-      </a>
-      <nav aria-label={t("nav.site")}>
-        {pages.slice(1).map((p) => (
-          <a
-            href={path(locale, p)}
-            aria-current={p === page ? "page" : undefined}
-          >
-            {t("nav." + p)}
-          </a>
-        ))}
-      </nav>
-      <nav class="utility" aria-label={t("language")}>
-        {Object.entries(languages).map(([l, name]) => (
-          <a
-            lang={l}
-            href={path(l as Locale, page)}
-            aria-current={l === locale ? "true" : undefined}
-          >
-            {name}
-          </a>
-        ))}
-        <label class="sr-only" for="site-theme">
-          {t("theme.label")}
-        </label>
-        <select id="site-theme" hidden>
-          <option value="system">{t("theme.system")}</option>
-          <option value="light">{t("theme.light")}</option>
-          <option value="dark">{t("theme.dark")}</option>
-        </select>
-      </nav>
-    </header>
-    <main id="content">
-      <section class:list={["hero", { home }]}>
-        <div>
-          {home && <p class="eyebrow">{t("early")}</p>}
-          <h1>{title}</h1>
-          <p class="lead">{intro}</p>
-          {home && (
-            <div class="buttons">
-              <a href={path(locale, "vision")}>
-                {t("explore")} <span aria-hidden="true">→</span>
-              </a>
-              <a href={actions.forum}>
-                {t("forum")} <span aria-hidden="true">↗</span>
-              </a>
-            </div>
-          )}
-        </div>
+{entry ? (
+  <Article {entry} {alternatives} />
+) : (
+  <Layout {locale} {page} {title} description={intro}>
+    <section class:list={["hero", { home }]}>
+      <div>
+        {home && <p class="eyebrow">{t("early")}</p>}
+        <h1>{title}</h1>
+        <p class="lead">{intro}</p>
         {home && (
-          <figure class="preview">
-            <figcaption>{t("preview.caption")}</figcaption>
-            <div class="preview-window">
-              <div class="preview-header">
-                <img src="/brand/symbol.svg" width="23" height="23" alt="" />
-                <strong>erp4us</strong>
-              </div>
-              <div class="preview-body">
-                <div class="preview-rail">
-                  <span>{t("preview.workspace")}</span>
-                  <strong>{t("preview.master")}</strong>
-                </div>
-                <div class="preview-content">
-                  <span>
-                    {t("preview.master")} / {t("preview.products")}
-                  </span>
-                  <strong class="preview-title">{t("preview.products")}</strong>
-                  <div class="preview-card">
-                    <b>{t("preview.register")}</b>
-                    <span>
-                      <code>SKU</code> · {t("preview.name")}
-                    </span>
-                  </div>
-                  <div class="preview-card">
-                    <b>{t("preview.lookup")}</b>
-                  </div>
-                </div>
-              </div>
+          <>
+            <p class="section-note">{t("hero.stage")}</p>
+            <div class="buttons">
+              <a href={path(locale, "contribute")}>
+                {t("join")} <span aria-hidden="true">→</span>
+              </a>
+              <a href={organization}>
+                {t("hero.github")} <span aria-hidden="true">↗</span>
+              </a>
             </div>
-          </figure>
+            <p class="section-note">
+              <a href={path(locale, "vision")}>{t("explore")} →</a>
+            </p>
+          </>
         )}
+      </div>
+      {home && (
+        <aside class="hero-status" aria-labelledby="project-now">
+          <p class="eyebrow">{t("home.status")}</p>
+          <h2 id="project-now">{t("home.foundation")}</h2>
+          <p>{t("stack.localNote")}</p>
+          <dl>
+            <div>
+              <dt>{t("available")}</dt>
+              <dd>{t("now")}</dd>
+            </div>
+            <div>
+              <dt>{t("active")}</dt>
+              <dd>{t("home.next")}</dd>
+            </div>
+          </dl>
+          <p>
+            <a href={path(locale, "roadmap")}>{t("nav.roadmap")} →</a>
+          </p>
+        </aside>
+      )}
+    </section>
+
+    {home && (
+      <>
+        <section class="panel mission" aria-labelledby="mission-title">
+          <p class="eyebrow">{t("mission.label")}</p>
+          <h2 id="mission-title">{t("mission.title")}</h2>
+          <p class="lead">{t("mission.intro")}</p>
+          <dl class="mission-grid">
+            {["control", "community", "foundation", "international"].map(
+              (key, i) => (
+                <div>
+                  <svg
+                    width="26"
+                    height="26"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    {i === 0 && (
+                      <path d="M7 11V7a5 5 0 0 1 9.6-2M5 11h14v10H5z" />
+                    )}
+                    {i === 1 && (
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2m20 0v-2a4 4 0 0 0-3-4M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zm4-4a4 4 0 0 1 0 8" />
+                    )}
+                    {i === 2 && (
+                      <path d="m2 8 10-5 10 5-10 5-10-5zm0 5 10 5 10-5M2 18l10 5 10-5" />
+                    )}
+                    {i === 3 && (
+                      <>
+                        <circle cx="12" cy="12" r="10" />
+                        <ellipse cx="12" cy="12" rx="4" ry="10" />
+                        <path d="M2 12h20" />
+                      </>
+                    )}
+                  </svg>
+                  <dt>{t(`mission.${key}.title`)}</dt>
+                  <dd>{t(`mission.${key}.text`)}</dd>
+                </div>
+              ),
+            )}
+          </dl>
+          <p class="statement">{t("mission.statement")}</p>
+        </section>
+        <section class="panel">
+          <p class="eyebrow">{t("nav.community")}</p>
+          <h2>{t("founding.title")}</h2>
+          <p>{t("contribute.intro")}</p>
+          <div class="buttons">
+            <a href={path(locale, "contribute")}>{t("join")} →</a>
+            <a href={`${path(locale, "community")}#questions`}>
+              {t("nav.questions")} →
+            </a>
+            <a href={path(locale, "development")}>{t("nav.activity")} →</a>
+          </div>
+        </section>
+      </>
+    )}
+
+    {page === "vision" && (
+      <section class="panel">
+        <h2>{t("principles")}</h2>
+        <ul class="cards">
+          {group("principle").map((key) => (
+            <li>{t(key)}</li>
+          ))}
+        </ul>
       </section>
-      {(home || page === "roadmap") && (
+    )}
+    {page === "architecture" && (
+      <>
+        <figure class="architecture">
+          <figcaption>{t("path")}</figcaption>
+          <ol class="diagram">
+            {["layer1", "layer2", "layer3", "layer4"].map((key) => (
+              <li>{t(key)}</li>
+            ))}
+          </ol>
+        </figure>
+        <section class="panel" aria-labelledby="technology-stack">
+          <h2 id="technology-stack">{t("stack.heading")}</h2>
+          <h3>{t("stack.local")}</h3>
+          <p>{t("stack.localNote")}</p>
+          <ul class="cards">
+            {["angular", "rust", "mongodb", "contracts", "compose", "nats"].map(
+              (key) => (
+                <li>
+                  <strong>{t(`stack.${key}.name`)}</strong>
+                  <p>{t(`stack.${key}.detail`)}</p>
+                </li>
+              ),
+            )}
+          </ul>
+          <h3>{t("active")}</h3>
+          <p>{t("stack.activeNote")}</p>
+          <h3>{t("stack.planned")}</h3>
+          <ul class="cards">
+            {["identity", "storage", "kubernetes", "mcp"].map((key) => (
+              <li>
+                <strong>{t(`stack.${key}.name`)}</strong>
+                <p>{t(`stack.${key}.detail`)}</p>
+              </li>
+            ))}
+          </ul>
+          <h3>{t("stack.discussion")}</h3>
+          <p>
+            {t("stack.discussionNote")}{" "}
+            <a href={`${path(locale, "community")}#questions`}>
+              {t("nav.questions")} →
+            </a>
+          </p>
+          <h3>{t("stack.sources")}</h3>
+          <ul>
+            <li>
+              <a href={`${repo}#run-the-first-slice`}>
+                {t("stack.quickstart")}
+              </a>
+            </li>
+            <li>
+              <a href={policies.decisions}>{t("stack.decisions")}</a>
+            </li>
+            <li>
+              <a href={policies.license}>Apache-2.0</a>
+            </li>
+            <li>
+              <a href={path(locale, "roadmap")}>{t("nav.roadmap")}</a>
+            </li>
+          </ul>
+        </section>
+      </>
+    )}
+    {page === "industries" && (
+      <ul class="cards">
+        {group("industry").map((key) => (
+          <li>{t(key)}</li>
+        ))}
+      </ul>
+    )}
+    {page === "roadmap" && (
+      <>
+        <section class="panel">
+          <h2>{t("road.phases")}</h2>
+          <ol class="steps">
+            {group("phase").map((key) => (
+              <li>{t(key)}</li>
+            ))}
+          </ol>
+          <p>
+            <a href={`${repo}/issues/16`}>{t("road.workflow")} ↗</a> ·{" "}
+            <a href={`${path(locale, "community")}#questions`}>
+              {t("nav.questions")} →
+            </a>
+          </p>
+          <p>
+            <a href={`${repo}/blob/main/ROADMAP.md`}>{t("source")} ↗</a>
+          </p>
+        </section>
+        <ProjectData {locale} section="milestones" />
         <section class="capabilities">
           <h2>{t("domains")}</h2>
           <p>{t("status")}</p>
@@ -168,142 +297,110 @@ const url = new URL(path(locale, page), Astro.site);
               ["available", "now"],
               ["active", "working"],
               ["experimental", "draft"],
-              ...group("domain").map((k) => ["planned", k]),
-            ].map(([s, k]) => (
+              ...group("domain").map((key) => ["planned", key]),
+            ].map(([state, key]) => (
               <div>
-                <dt>{t(k)}</dt>
-                <dd class:list={["capability", s]}>{t(s)}</dd>
+                <dt>{t(key)}</dt>
+                <dd class:list={["capability", state]}>{t(state)}</dd>
               </div>
             ))}
           </dl>
         </section>
-      )}
-      {page === "vision" && (
-        <>
-          <h2>{t("principles")}</h2>
-          <ul class="cards">
-            {group("principle").map((k) => (
-              <li>{t(k)}</li>
+      </>
+    )}
+    {page === "contribute" && (
+      <>
+        <section class="panel" aria-labelledby="find-role">
+          <h2 id="find-role">{t("founding.areas")}</h2>
+          <p>{t("founding.note")}</p>
+          <ul class="entry-list area-list">
+            {Object.entries(areaLinks).map(([key, href]) => (
+              <li>
+                <h3>{t(`area.${key}`)}</h3>
+                <p>{t(`area.${key}.intro`)}</p>
+                <a href={href}>{t(`area.${key}.link`)} ↗</a>
+              </li>
             ))}
           </ul>
-        </>
-      )}
-      {page === "architecture" && (
-        <>
-          <figure class="architecture">
-            <figcaption>{t("path")}</figcaption>
-            <ol class="diagram">
-              {["layer1", "layer2", "layer3", "layer4"].map((k) => (
-                <li>{t(k)}</li>
-              ))}
-            </ol>
-          </figure>
-          <section aria-labelledby="technology-stack">
-            <h2 id="technology-stack">{t("stack.heading")}</h2>
-            <h3>{t("stack.local")}</h3>
-            <p>{t("stack.localNote")}</p>
-            <ul class="cards">
-              {[
-                "angular",
-                "rust",
-                "mongodb",
-                "contracts",
-                "compose",
-                "nats",
-              ].map((key) => (
-                <li>
-                  <strong>{t(`stack.${key}.name`)}</strong>
-                  <p>{t(`stack.${key}.detail`)}</p>
-                </li>
-              ))}
-            </ul>
-            <h3>{t("stack.planned")}</h3>
-            <ul class="cards">
-              {["identity", "storage", "kubernetes", "mcp"].map((key) => (
-                <li>
-                  <strong>{t(`stack.${key}.name`)}</strong>
-                  <p>{t(`stack.${key}.detail`)}</p>
-                </li>
-              ))}
-            </ul>
-            <h3>{t("stack.sources")}</h3>
-            <ul>
-              <li>
-                <a href={repo + "#run-the-first-slice"}>
-                  {t("stack.quickstart")}
-                </a>
-              </li>
-              <li>
-                <a href={repo + "/tree/main/docs/adr"}>
-                  {t("stack.decisions")}
-                </a>
-              </li>
-              <li>
-                <a href={repo + "/blob/main/ROADMAP.md"}>{t("nav.roadmap")}</a>
-              </li>
-            </ul>
-          </section>
-        </>
-      )}
-      {page === "industries" && (
-        <ul class="cards">
-          {group("industry").map((k) => (
-            <li>{t(k)}</li>
-          ))}
-        </ul>
-      )}
-      {page === "roadmap" && (
-        <>
-          <ol class="steps">
-            {group("phase").map((k) => (
-              <li>{t(k)}</li>
-            ))}
-          </ol>
-          <a href={repo + "/blob/main/ROADMAP.md"}>{t("source")} ↗</a>
-        </>
-      )}
-      {(page === "community" || page === "contribute") && (
-        <div class="cards">
-          {Object.entries(actions).map(([k, href]) => (
-            <a href={href}>{t(k)} ↗</a>
-          ))}
-        </div>
-      )}
-      {home && snap && (
-        <section>
-          <h2>{t("signal")}</h2>
-          <p>
-            <a href={repo + "/stargazers"}>
-              {snap.stars} {t("stars")}
-            </a>{" "}
-            · {t("snapshot")}: <time>{snap.date}</time>
+          <p class="section-note">
+            <a href={`${path(locale, "community")}#governance`}>
+              {t("nav.governance")} →
+            </a>
           </p>
         </section>
-      )}
-    </main>
-    <footer>
-      <strong>{t("slogan")}</strong>
-      <nav>
-        <a href={repo + "/tree/main/docs"}>{t("docs")}</a>
-        <a href={repo}>{t("github")} ↗</a>
-      </nav>
-    </footer>
-    <script>
-      const select = document.querySelector<HTMLSelectElement>("#site-theme");
-      if (select) {
-        const root = document.documentElement;
-        select.value = root.dataset.theme ?? "system";
-        select.hidden = false;
-        select.addEventListener("change", () => {
-          if (select.value === "system") delete root.dataset.theme;
-          else root.dataset.theme = select.value;
-          try {
-            localStorage.setItem("erp4us.site.theme", select.value);
-          } catch {
-            /* The explicit theme still applies for this page. */
-          }
-        });
-      }
-    </script>
-  </body>
-</html>
+        <ProjectData {locale} section="opportunities" />
+      </>
+    )}
+    {page === "community" && (
+      <>
+        <section
+          class="panel"
+          id="governance"
+          aria-labelledby="governance-title"
+        >
+          <h2 id="governance-title">{t("nav.governance")}</h2>
+          <p>{t("governance.intro")}</p>
+          <ol class="steps">
+            {group("onboard").map((key) => (
+              <li>{t(key)}</li>
+            ))}
+          </ol>
+          <ul class="policy-links">
+            {Object.entries(policies).map(([key, href]) => (
+              <li>
+                <a href={href}>{t(`policy.${key}`)} ↗</a>
+              </li>
+            ))}
+          </ul>
+        </section>
+        <ProjectData {locale} section="questions" />
+        <ContributorWall {locale} />
+      </>
+    )}
+    {page === "development" && (
+      <>
+        <ProjectData {locale} section="activity" />
+        <section class="panel">
+          <h2>{t("human.title")}</h2>
+          <p>{t("human.intro")}</p>
+          <p class="section-note">{t("human.review")}</p>
+          <p class="section-note">
+            <a href={policies.agents}>{t("policy.agents")} ↗</a> ·{" "}
+            <a href={path(locale, "devlog")}>{t("nav.devlog")} →</a>
+          </p>
+        </section>
+      </>
+    )}
+    {page === "devlog" && (
+      <section class="panel" aria-labelledby="devlog-list">
+        <h2 id="devlog-list">{t("devlog.posts")}</h2>
+        {entries.length ? (
+          <ul class="entry-list">
+            {entries.map(({ data }) => (
+              <li>
+                <p class="entry-meta">
+                  <time datetime={data.date.toISOString()}>
+                    {new Intl.DateTimeFormat(locale, {
+                      dateStyle: "long",
+                      timeZone: "UTC",
+                    }).format(data.date)}
+                  </time>{" "}
+                  · {data.author}
+                </p>
+                <h3>
+                  <a href={articlePath(data.locale, data.slug)}>{data.title}</a>
+                </h3>
+                <p>{data.description}</p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>{t("devlog.empty")}</p>
+        )}
+        <p class="section-note">
+          <a href={`${path(locale, "devlog")}rss.xml`}>{t("devlog.feed")}</a>
+        </p>
+      </section>
+    )}
+  </Layout>
+)}

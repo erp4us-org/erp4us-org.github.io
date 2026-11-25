@@ -1,0 +1,50 @@
+---
+import { render, type CollectionEntry } from "astro:content";
+import Layout from "./Layout.astro";
+import { articlePath, readingTime } from "../devlog";
+import { path, translate, type Locale } from "../site";
+const { entry, alternatives } = Astro.props as {
+  entry: CollectionEntry<"devlog">;
+  alternatives: Partial<Record<Locale, string>>;
+};
+const { data } = entry;
+const { Content } = await render(entry);
+const t = (key: string) => translate(data.locale, key);
+---
+
+<Layout
+  locale={data.locale}
+  page="devlog"
+  title={data.title}
+  description={data.description}
+  article={{
+    url: articlePath(data.locale, data.slug),
+    author: data.author,
+    date: data.date,
+    image: data.image,
+    alternatives,
+  }}
+>
+  <article class="article">
+    <div class="hero">
+      <a href={path(data.locale, "devlog")}>← {t("devlog.back")}</a>
+      <h1>{data.title}</h1>
+      <p class="lead">{data.description}</p>
+      <p class="section-note">
+        <time datetime={data.date.toISOString()}>
+          {new Intl.DateTimeFormat(data.locale, {
+            dateStyle: "long",
+            timeZone: "UTC",
+          }).format(data.date)}
+        </time>
+        · {data.author} · {readingTime(entry.body ?? "")} {t("devlog.readTime")}
+      </p>
+      <ul class="tags">
+        {[...data.categories, ...data.tags].map((tag) => (
+          <li>{tag}</li>
+        ))}
+      </ul>
+    </div>
+    <Content />
+  </article>
+</Layout>

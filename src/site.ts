@@ -11,11 +11,14 @@ export const pages = [
   "roadmap",
   "community",
   "contribute",
+  "development",
+  "devlog",
 ] as const;
 export type Page = (typeof pages)[number];
 export const path = (l: Locale, p: Page) =>
   `/${l === "en" ? "" : l + "/"}${p === "home" ? "" : p + "/"}`;
 export const repo = "https://github.com/erp4us-org/erp4us";
+export const organization = "https://github.com/erp4us-org";
 const forum = repo + "/discussions";
 const guide = repo + "/blob/main/CONTRIBUTING.md";
 export const actions = {
@@ -23,29 +26,33 @@ export const actions = {
   industryKnowledge: forum + "/72",
   businessRequirement: forum + "/new/choose",
   guide,
-  first: repo + "/issues?q=is%3Aopen+label%3A%22good+first+issue%22",
-  scenario: repo + "/issues/16",
   issues: repo + "/issues",
   prs: repo + "/pulls",
   rfc: repo + "/blob/main/GOVERNANCE.md",
 };
-async function snapshot() {
-  try {
-    const r = await fetch("https://api.github.com/repos/erp4us-org/erp4us", {
-      signal: AbortSignal.timeout(3000),
-    });
-    if (!r.ok) return;
-    const data = await r.json();
-    if (
-      Number.isSafeInteger(data.stargazers_count) &&
-      data.stargazers_count >= 0
-    )
-      return {
-        stars: data.stargazers_count,
-        date: new Date().toISOString().slice(0, 10),
-      };
-  } catch {
-    /* Optional metadata: omit it when unavailable. */
-  }
-}
-export const signals = snapshot();
+export const translate = (locale: Locale, key: string) =>
+  (catalogs[locale] as Record<string, string>)[key] ??
+  (catalogs.en as Record<string, string>)[key] ??
+  (() => {
+    throw new Error(`Unknown translation key: ${key}`);
+  })();
+export const areaLinks = {
+  engineering: repo + "/issues/36",
+  architecture: forum + "/73",
+  domain: forum + "/72",
+  design: forum + "/74",
+  infrastructure: repo + "/issues/78",
+  automation: forum + "/76",
+  docs: repo + "/issues/33",
+};
+export const policies = {
+  contributing: `${repo}/blob/main/CONTRIBUTING.md`,
+  conduct: `${repo}/blob/main/CODE_OF_CONDUCT.md`,
+  security: `${repo}/blob/main/SECURITY.md`,
+  license: `${repo}/blob/main/LICENSE`,
+  agents: `${repo}/blob/main/AGENTS.md`,
+  governance: actions.rfc,
+  decisions: `${repo}/tree/main/docs/adr`,
+  discussions: forum,
+  projects: `${organization.replace("github.com/", "github.com/orgs/")}/projects`,
+};

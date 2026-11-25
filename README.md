@@ -1,6 +1,6 @@
 # erp4us website
 
-The organization website is an Astro static build. Use the Node version in `.nvmrc`, npm and Python 3. Run `npm ci` then `npm run dev`. Before submitting run `npm run format && npm run lint && npm run check && npm run build && npm run links`. To format changes use `npx prettier --write .`. No server, API key, external fonts or translation service is needed at runtime. The build optionally reads one public GitHub repository snapshot; a timeout or unavailable API omits the metric.
+The organization website is an Astro static build. Use the Node version in `.nvmrc`, npm and Python 3. Run `npm ci` then `npm run dev`. Before submitting run `npm run format && npm run lint && npm test && npm run check && GITHUB_SNAPSHOT=tests/fixtures/github.json npm run build && npm run links`. To format changes use `npx prettier --write .`. No server, API key, external fonts or translation service is needed at runtime. See the [community launch and maintenance guide](docs/community-launch.md) for live data, editorial approvals and optional browser checks.
 
 ## Content and translations
 
@@ -10,7 +10,7 @@ The [application roadmap](https://github.com/erp4us-org/erp4us/blob/main/ROADMAP
 
 ## Publishing
 
-Pull requests validate on hosted runners; only a validated main build uploads and deploys to GitHub Pages. Preview: https://erp4us-org.github.io/. [Custom domain runbook](docs/domain.md). [Brand assets](public/brand/README.md).
+Pull requests validate offline with fixtures; only a validated main build with a successful public GitHub refresh uploads and deploys to GitHub Pages. Preview: https://erp4us-org.github.io/. [Custom domain runbook](docs/domain.md). [Brand assets](public/brand/README.md).
 
 ## Dependencies
 

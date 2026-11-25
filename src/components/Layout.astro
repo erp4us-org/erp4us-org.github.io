@@ -1,0 +1,259 @@
+---
+import {
+  languages,
+  organization,
+  path,
+  repo,
+  translate,
+  type Locale,
+  type Page,
+} from "../site";
+import "../style.css";
+interface Props {
+  locale: Locale;
+  page: Page;
+  title: string;
+  description: string;
+  article?: {
+    url: string;
+    author: string;
+    date: Date;
+    image?: string;
+    alternatives: Partial<Record<Locale, string>>;
+  };
+}
+const { locale, page, title, description, article } = Astro.props;
+const t = (key: string) => translate(locale, key);
+const url = new URL(article?.url ?? path(locale, page), Astro.site);
+const image = new URL(
+  article?.image ?? "/brand/community-social.png",
+  Astro.site,
+);
+const alternate = (l: Locale) =>
+  article ? article.alternatives[l] : path(l, page);
+const titleTag = `${title} | erp4us`;
+const schema = article
+  ? {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      headline: title,
+      description,
+      url: url.href,
+      inLanguage: locale,
+      image: image.href,
+      datePublished: article.date.toISOString(),
+      author: { "@type": "Person", name: article.author },
+    }
+  : {
+      "@context": "https://schema.org",
+      "@type": page === "home" ? "WebSite" : "WebPage",
+      name: title,
+      description,
+      url: url.href,
+      inLanguage: locale,
+      publisher: {
+        "@type": "Organization",
+        name: "erp4us",
+        sameAs: organization,
+      },
+    };
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{titleTag}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={url} />
+    {(Object.keys(languages) as Locale[]).map(
+      (l) =>
+        alternate(l) && (
+          <link
+            rel="alternate"
+            hreflang={l}
+            href={new URL(alternate(l)!, Astro.site)}
+          />
+        ),
+    )}
+    {alternate("en") && (
+      <link
+        rel="alternate"
+        hreflang="x-default"
+        href={new URL(alternate("en")!, Astro.site)}
+      />
+    )}
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={t("nav.devlog")}
+      href={`${path(locale, "devlog")}rss.xml`}
+    />
+    <link rel="icon" href="/brand/favicon.svg" />
+    <link rel="stylesheet" href="/brand/tokens.css" />
+    <script is:inline>
+      try {
+        const theme = localStorage.getItem("erp4us.site.theme");
+        if (theme === "light" || theme === "dark")
+          document.documentElement.dataset.theme = theme;
+      } catch {
+        /* Follow system preference. */
+      }
+    </script>
+    <meta property="og:type" content={article ? "article" : "website"} />
+    <meta property="og:site_name" content="erp4us" />
+    <meta property="og:title" content={titleTag} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={url} />
+    <meta property="og:image" content={image} />
+    {!article?.image && (
+      <>
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+      </>
+    )}
+    <meta
+      property="og:image:alt"
+      content={article?.image ? title : t("social.alt")}
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    {article && (
+      <meta
+        property="article:published_time"
+        content={article.date.toISOString()}
+      />
+    )}
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(schema).replaceAll("<", "\\u003c")}
+    />
+  </head>
+  <body>
+    <a class="skip" href="#content">
+      {t("skip")}
+    </a>
+    <header>
+      <a class="word" href={path(locale, "home")} aria-label="erp4us">
+        <img src="/brand/symbol.svg" alt="" width="36" height="36" /> erp
+        <b>4</b>us
+      </a>
+      <nav aria-label={t("nav.site")}>
+        <details class="nav-group">
+          <summary>{t("nav.project")}</summary>
+          <div>
+            {(["vision", "architecture", "industries", "roadmap"] as const).map(
+              (p) => (
+                <a
+                  href={path(locale, p)}
+                  aria-current={p === page ? "page" : undefined}
+                >
+                  {t(`nav.${p}`)}
+                </a>
+              ),
+            )}
+          </div>
+        </details>
+        <details class="nav-group">
+          <summary>{t("nav.community")}</summary>
+          <div>
+            <a href={path(locale, "contribute")}>{t("nav.contribute")}</a>
+            <a href={`${path(locale, "contribute")}#opportunities`}>
+              {t("nav.opportunities")}
+            </a>
+            <a href={`${path(locale, "community")}#questions`}>
+              {t("nav.questions")}
+            </a>
+            <a href={`${path(locale, "community")}#governance`}>
+              {t("nav.governance")}
+            </a>
+          </div>
+        </details>
+        <details class="nav-group">
+          <summary>{t("nav.development")}</summary>
+          <div>
+            <a href={path(locale, "development")}>{t("nav.activity")}</a>
+            <a
+              href={path(locale, "devlog")}
+              aria-current={page === "devlog" ? "page" : undefined}
+            >
+              {t("nav.devlog")}
+            </a>
+            <a href={`${repo}/tree/main/docs`}>{t("docs")} ↗</a>
+            <a href={organization}>{t("github")} ↗</a>
+          </div>
+        </details>
+        <a
+          class="header-cta"
+          href={path(locale, "contribute")}
+          aria-current={page === "contribute" ? "page" : undefined}
+        >
+          {t("nav.contribute")}
+        </a>
+      </nav>
+      <nav class="utility" aria-label={t("language")}>
+        {(Object.entries(languages) as [Locale, string][]).map(([l, name]) => (
+          <a
+            lang={l}
+            href={alternate(l) ?? path(l, "devlog")}
+            aria-current={l === locale ? "true" : undefined}
+          >
+            {name}
+          </a>
+        ))}
+        <label class="sr-only" for="site-theme">
+          {t("theme.label")}
+        </label>
+        <select id="site-theme" hidden>
+          <option value="system">{t("theme.system")}</option>
+          <option value="light">{t("theme.light")}</option>
+          <option value="dark">{t("theme.dark")}</option>
+        </select>
+      </nav>
+    </header>
+    <main id="content">
+      <slot />
+    </main>
+    <footer>
+      <strong>{t("slogan")}</strong>
+      <nav>
+        <a href={path(locale, "community")}>{t("nav.community")}</a>
+        <a href={`${repo}/tree/main/docs`}>{t("docs")}</a>
+        <a href={organization}>{t("github")} ↗</a>
+      </nav>
+    </footer>
+    <script>
+      const select = document.querySelector<HTMLSelectElement>("#site-theme");
+      if (select) {
+        const root = document.documentElement;
+        select.value = root.dataset.theme ?? "system";
+        select.hidden = false;
+        select.addEventListener("change", () => {
+          if (select.value === "system") delete root.dataset.theme;
+          else root.dataset.theme = select.value;
+          try {
+            localStorage.setItem("erp4us.site.theme", select.value);
+          } catch {
+            /* The theme still applies. */
+          }
+        });
+      }
+      const groups =
+        document.querySelectorAll<HTMLDetailsElement>(".nav-group");
+      document.addEventListener("click", (event) => {
+        for (const group of groups)
+          if (event.target instanceof Node && !group.contains(event.target))
+            group.open = false;
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape") return;
+        for (const group of groups) {
+          if (!group.open) continue;
+          group.open = false;
+          if (group.contains(document.activeElement))
+            group.querySelector("summary")?.focus();
+        }
+      });
+    </script>
+  </body>
+</html>
