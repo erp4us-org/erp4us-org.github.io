@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "updated": "2026-01-02T00:00:00.000Z",
+  "metrics": {
+    "repositories": 1,
+    "contributors": 1,
+    "commits": 1,
+    "issues": 1,
+    "pulls": 0,
+    "merged": 1,
+    "milestones": 0,
+    "opportunities": 1
+  },
+  "opportunities": [
+    {
+      "repo": "erp4us",
+      "title": "Fixture: Review a short description",
+      "summary": "<script>document.body.dataset.compromised = 'yes'</script> is escaped.",
+      "url": "https://github.com/erp4us-org/erp4us/issues/1",
+      "labels": ["good first issue", "documentation"],
+      "areas": ["docs"],
+      "level": "first",
+      "status": "unassigned"
+    }
+  ],
+  "questions": [],
+  "milestones": [],
+  "activity": [
+    {
+      "repo": "erp4us",
+      "title": "Fixture: Test a local change",
+      "kind": "pull",
+      "date": "2026-01-01T00:00:00.000Z",
+      "url": "https://github.com/erp4us-org/erp4us/pull/1"
+    }
+  ]
+}

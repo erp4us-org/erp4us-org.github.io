@@ -8,6 +8,8 @@
     "check": "astro check",
     "format": "prettier --check .",
     "lint": "node scripts/catalog.mjs",
+    "test": "node --test tests/github.test.mjs",
+    "github:refresh": "node scripts/github.mjs",
     "links": "python3 scripts/links.py"
   },
   "repository": {
