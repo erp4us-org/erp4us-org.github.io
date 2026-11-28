@@ -3,6 +3,7 @@ import Layout from "../components/Layout.astro";
 import ProjectData from "../components/ProjectData.astro";
 import ContributorWall from "../components/ContributorWall.astro";
 import Article from "../components/Article.astro";
+import AnswerFirst from "../components/AnswerFirst.astro";
 import type { CollectionEntry } from "astro:content";
 import { posts, articlePath } from "../devlog";
 import {
@@ -102,7 +103,9 @@ const entries = page === "devlog" ? await posts(locale) : [];
               </a>
             </div>
             <p class="section-note">
-              <a href={path(locale, "vision")}>{t("explore")} →</a>
+              <a href={`${path(locale, "vision")}#answer-first`}>
+                {t("explore")} <span aria-hidden="true">→</span>
+              </a>
             </p>
           </>
         )}
@@ -195,14 +198,17 @@ const entries = page === "devlog" ? await posts(locale) : [];
     )}
 
     {page === "vision" && (
-      <section class="panel">
-        <h2>{t("principles")}</h2>
-        <ul class="cards">
-          {group("principle").map((key) => (
-            <li>{t(key)}</li>
-          ))}
-        </ul>
-      </section>
+      <>
+        <AnswerFirst {locale} />
+        <section class="panel">
+          <h2>{t("principles")}</h2>
+          <ul class="cards">
+            {group("principle").map((key) => (
+              <li>{t(key)}</li>
+            ))}
+          </ul>
+        </section>
+      </>
     )}
     {page === "architecture" && (
       <>

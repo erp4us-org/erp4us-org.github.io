@@ -27,6 +27,7 @@ try {
     page.on("pageerror", (error) => errors.push(error.message));
     for (const route of [
       "/",
+      "/vision/",
       "/architecture/",
       "/contribute/",
       "/community/",
@@ -91,6 +92,12 @@ try {
         });
       }
       if (route === "/") {
+        assert.equal(
+          await page
+            .locator(`main a[href="${prefix}/vision/#answer-first"]`)
+            .count(),
+          1,
+        );
         await page.keyboard.press("Tab");
         assert.equal(
           await page.evaluate(() =>
@@ -116,6 +123,25 @@ try {
           opposite,
         );
         await page.locator("#site-theme").selectOption("system");
+      }
+      if (route === "/vision/") {
+        const mockup = page.locator("#answer-first figure");
+        assert.equal(await mockup.locator("figcaption").count(), 1);
+        assert.equal(
+          await mockup.locator("a, button, input, [tabindex]").count(),
+          0,
+        );
+        assert.equal(
+          await mockup.locator('svg:not([aria-hidden="true"])').count(),
+          0,
+        );
+        const text = await mockup.innerText();
+        assert.match(text, /10 × NM-1000\/A/);
+        assert.match(text, /NM-1100\/A/);
+        assert.match(text, /20 (needed|benötigt)/);
+        assert.match(text, /8 (reserved|reserviert)/);
+        assert.match(text, /12 (missing|fehlen)/);
+        assert.match(text, /120 (of|von) 160/);
       }
       if (
         route === "/contribute/" &&
