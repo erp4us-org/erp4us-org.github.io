@@ -67,6 +67,8 @@
   "home.status": "Projektstand",
   "home.foundation": "Vom Fundament zum ersten Prozess",
   "home.next": "Prozess vom Auftrag bis zur Beschaffung",
+  "home.freeUse.question": "Bleibt erp4us immer kostenlos?",
+  "home.freeUse.answer": "ERP4us wird sich immer kostenlos nutzen und selbst betreiben lassen – auch für Unternehmen. Es wird nie eine kostenpflichtige Enterprise-Edition geben. Keine ERP4us-Funktion wird zahlender Kundschaft vorbehalten sein. Wenn du dich für einen Hostinganbieter entscheidest, können dessen übliche Hostingkosten anfallen.",
   "mission.label": "Unsere Mission",
   "mission.title": "Die Welt verdient ein besseres ERP.",
   "mission.intro": "Unternehmen sollen ihre Geschäftsdaten kontrollieren, den Betriebsort selbst wählen und Prozesse anpassen können, ohne von einem Anbieter abhängig zu sein.",
