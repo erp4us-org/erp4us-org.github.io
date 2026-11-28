@@ -1,0 +1,214 @@
+---
+import { translate, type Locale } from "../site";
+
+const { locale } = Astro.props as { locale: Locale };
+const t = (key: string) => translate(locale, `vision.answerFirst.${key}`);
+const examples = [
+  { key: "stock", icon: "M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4m-9 4v10" },
+  {
+    key: "overdue",
+    icon: "M5 5h14v15H5zM8 3v4m8-4v4M5 10h14m-7 3v2m0 2v.1",
+  },
+  {
+    key: "spares",
+    icon: "M9 3h6v5H9zM3 16h6v5H3zm12 0h6v5h-6zM12 8v4m-6 4v-4h12v4",
+  },
+  { key: "capacity", icon: "M4 4v16h16M8 16v-4m4 4V7m4 9v-6m4 6V5" },
+];
+---
+
+<section class="panel" id="answer-first" aria-labelledby="answer-first-title">
+  <h2 id="answer-first-title">{t("title")}</h2>
+  <p class="lead">{t("intro")}</p>
+  <p class="section-note">{t("workspace")}</p>
+  <figure class="preview section-note">
+    <figcaption>{t("example")}</figcaption>
+    <div class="query">
+      <svg
+        class="icon"
+        viewBox="0 0 24 24"
+        width="24"
+        height="24"
+        aria-hidden="true"
+      >
+        <circle cx="10.5" cy="10.5" r="6.5"></circle>
+        <path d="m15.5 15.5 4.5 4.5"></path>
+      </svg>
+      <div>
+        <p class="detail-label">{t("input")}</p>
+        <p class="query-text">{t("question")}</p>
+      </div>
+    </div>
+    <div class="result">
+      <p class="detail-label">{t("order")}</p>
+      <h3>{t("answer")}</h3>
+      <div class="evidence">
+        <div class="evidence-card">
+          <p class="detail-label">{t("path")}</p>
+          <ol class="dependency-path" role="list">
+            <li>
+              <strong>NM-1000/A</strong> · {t("product")}
+            </li>
+            <li>
+              <span aria-hidden="true">↓</span>
+              <strong>NM-1100/A</strong> · {t("assembly")}
+            </li>
+            <li>
+              <span aria-hidden="true">↓</span>
+              {t("plates")}
+            </li>
+          </ol>
+        </div>
+        <div class="evidence-card">
+          <p class="detail-label">{t("quantities")}</p>
+          <p class="needed">{t("needed")}</p>
+          <div class="meter" style="--portion: 40%" aria-hidden="true"></div>
+          <p class="meter-labels">
+            <span>{t("reserved")}</span>
+            <span>{t("missing")}</span>
+          </p>
+        </div>
+      </div>
+      <p class="section-note">{t("evidence")}</p>
+      <p class="section-note">{t("next")}</p>
+      <p class="section-note">{t("limits")}</p>
+    </div>
+    <h3 class="examples-title">{t("examples")}</h3>
+    <ul class="examples" role="list">
+      {examples.map(({ key, icon }) => (
+        <li class="example-card">
+          <svg
+            class="icon"
+            viewBox="0 0 24 24"
+            width="24"
+            height="24"
+            aria-hidden="true"
+          >
+            <path d={icon} />
+          </svg>
+          <div>
+            <h4>{t(`${key}.question`)}</h4>
+            <p>{t(`${key}.answer`)}</p>
+            {key === "capacity" && (
+              <div class="meter" style="--portion: 75%" aria-hidden="true" />
+            )}
+          </div>
+        </li>
+      ))}
+    </ul>
+  </figure>
+  <p class="section-note">{t("access")}</p>
+  <p class="section-note">{t("permissions")}</p>
+  <p class="section-note">{t("tables")}</p>
+</section>
+
+<style>
+  .query,
+  .result,
+  .example-card {
+    padding: var(--space-4);
+    border: 1px solid var(--edge);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+  .query,
+  .example-card {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+  .query {
+    border-color: var(--edge-strong);
+  }
+  .icon {
+    flex: none;
+    color: var(--accent);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .detail-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+  .query-text,
+  .needed {
+    color: var(--ink);
+    font-weight: 700;
+  }
+  .result {
+    margin-block-start: var(--space-2);
+  }
+  .result h3 {
+    margin: 0 0 var(--space-3);
+  }
+  .result > p {
+    max-width: 72ch;
+  }
+  .evidence,
+  .examples {
+    display: grid;
+    gap: var(--space-3);
+  }
+  @media (min-width: 48rem) {
+    .evidence,
+    .examples {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .evidence-card {
+    padding: var(--space-3);
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-sm);
+    background: var(--nav);
+  }
+  .dependency-path,
+  .examples {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .dependency-path span {
+    display: block;
+    color: var(--accent);
+    font-weight: 700;
+    line-height: 1;
+  }
+  .meter {
+    block-size: 0.75rem;
+    margin-block-start: var(--space-2);
+    overflow: hidden;
+    border: 1px solid var(--edge-strong);
+    border-radius: var(--radius-sm);
+    background: repeating-linear-gradient(
+      135deg,
+      var(--edge-strong) 0 1px,
+      transparent 1px 5px
+    );
+  }
+  .meter::before {
+    content: "";
+    display: block;
+    inline-size: var(--portion);
+    block-size: 100%;
+    border-inline-end: 2px solid var(--ink);
+    background: var(--accent);
+  }
+  .meter-labels {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-1) var(--space-2);
+    margin-block-start: var(--space-1);
+    font-size: 0.9rem;
+  }
+  .examples-title {
+    margin: var(--space-4) 0 var(--space-2);
+  }
+  .example-card h4 {
+    margin: 0 0 var(--space-1);
+    line-height: 1.4;
+  }
+</style>
