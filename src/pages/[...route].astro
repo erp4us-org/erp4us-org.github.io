@@ -175,6 +175,10 @@ const entries = page === "devlog" ? await posts(locale) : [];
           </dl>
           <p class="statement">{t("mission.statement")}</p>
         </section>
+        <section class="panel" aria-labelledby="free-use-title">
+          <h2 id="free-use-title">{t("home.freeUse.question")}</h2>
+          <p>{t("home.freeUse.answer")}</p>
+        </section>
         <section class="panel">
           <p class="eyebrow">{t("nav.community")}</p>
           <h2>{t("founding.title")}</h2>

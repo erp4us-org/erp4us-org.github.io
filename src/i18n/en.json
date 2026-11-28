@@ -67,6 +67,8 @@
   "home.status": "Project status",
   "home.foundation": "From foundation to first workflow",
   "home.next": "Order-to-procurement workflow",
+  "home.freeUse.question": "Will erp4us always be free?",
+  "home.freeUse.answer": "ERP4us will always be free to use and self-host, including for businesses. There will never be a paid Enterprise edition. No ERP4us features will be reserved for paying customers. If you choose a hosting provider, its usual hosting costs may apply.",
   "mission.label": "Our mission",
   "mission.title": "The world deserves a better ERP.",
   "mission.intro": "Organizations should control their business records, choose where they run their software, and adapt their processes without depending on a single vendor.",
